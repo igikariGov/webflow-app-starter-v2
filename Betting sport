@@ -1,0 +1,145 @@
+/ src/App.jsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+
+function Home() {
+  return (
+    <div className="min-h-screen bg-gray-100 text-gray-800">
+      <header className="bg-green-700 p-4 flex justify-between items-center">
+        <h1 className="text-white text-2xl font-bold">Jamabet</h1>
+        <nav className="space-x-4">
+          <Link to="/login" className="text-white">Login</Link>
+          <Link to="/signup" className="text-white">Sign Up</Link>
+        </nav>
+      </header>
+
+      <main className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Featured Matches</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1, 2, 3].map((match, index) => (
+            <div key={index} className="bg-white rounded-xl shadow p-4">
+              <div className="flex justify-between items-center">
+                <span>Team A vs Team B</span>
+                <div className="space-x-2">
+                  <button className="bg-green-500 text-white px-2 py-1 rounded">1.75</button>
+                  <button className="bg-blue-500 text-white px-2 py-1 rounded">2.10</button>
+                  <button className="bg-red-500 text-white px-2 py-1 rounded">3.20</button>
+                </div>
+              </div>
+              <button className="mt-2 bg-green-700 text-white w-full py-1 rounded">Place Bet</button>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* We'll add Login and Signup components next */}
+      </Routes>
+    </Router>
+  );
+}
+
+Create match detail betpawa home page
+
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
+export default function MatchDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Dummy match data (you’ll fetch from backend later)
+  const match = {
+    id,
+    teamA: "Team A",
+    teamB: "Team B",
+    odds: {
+      home: 1.75,
+      draw: 2.10,
+      away: 3.20,
+    },
+    startTime: "2025-04-20 18:00",
+  };
+
+  const [selected, setSelected] = useState(null);
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
+
+  const calculatePotentialWin = () => {
+    if (!selected || !amount) return 0;
+    return (parseFloat(amount) * match.odds[selected]).toFixed(2);
+  };
+
+  const handleBet = () => {
+    if (!selected || !amount) {
+      setError("Please select an outcome and enter amount.");
+      return;
+    }
+
+    // TODO: Send to backend
+    alert(`Bet Placed on ${selected.toUpperCase()} for ${amount} units!`);
+    navigate("/");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-xl mx-auto bg-white shadow-lg rounded-xl p-6">
+        <h2 className="text-xl font-bold mb-2">
+          {match.teamA} vs {match.teamB}
+        </h2>
+        <p className="text-gray-600 mb-4">Kick-off: {match.startTime}</p>
+
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <button
+            onClick={() => setSelected("home")}
+            className={`py-2 rounded ${
+              selected === "home" ? "bg-green-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            {match.teamA} ({match.odds.home})
+          </button>
+          <button
+            onClick={() => setSelected("draw")}
+            className={`py-2 rounded ${
+              selected === "draw" ? "bg-blue-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            Draw ({match.odds.draw})
+          </button>
+          <button
+            onClick={() => setSelected("away")}
+            className={`py-2 rounded ${
+              selected === "away" ? "bg-red-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            {match.teamB} ({match.odds.away})
+          </button>
+        </div>
+
+        <input
+          type="number"
+          className="w-full border p-2 rounded mb-3"
+          placeholder="Enter amount to bet"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+
+        {amount && selected && (
+          <p className="mb-2">
+            Potential Win: <strong>{calculatePotentialWin()}</strong>
+          </p>
+        )}
+
+        {error && <p className="text-red-600 mb-2">{error}</p>}
+
+        <button
+          onClick={handleBet}
+          className="w-full bg-green-700 text-white py-2 rounded"
+     
